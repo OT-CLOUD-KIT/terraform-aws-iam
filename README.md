@@ -31,27 +31,61 @@ locals {
 }
 
 #Create simple Redis cluster with one node in disabled mode.
-module "iam" {
-  source             = "./"
-  name               = var.role_name
-  tags               = var.role_tags
-  iam_policy_arn     = var.iam_policy_arn
-  assume_role_policy = <<EOF
-{
+module "iam-role" {
+  source                 = "./terraform-aws-iam"
+  name                   = "opstree_test"
+  inline_policy_required = true
+  inline_policy_name     = "opstree-inline-policy"
+  iam_policy_arn         = [module.iam-role.custom_policy_arn]
+  inline_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Action   = "s3:ListBucket",
+        Effect   = "Allow",
+        Resource = "*"
+      },
+      {
+        Action   = ["s3:GetObject", "s3:PutObject"],
+        Effect   = "Allow",
+        Resource = "arn:aws:s3:::my-s3-bucket/*"
+      }
+    ]
+  })
+  assume_role_policy   = <<EOF
+    {
     "Version": "2012-10-17",
     "Statement": [
         {
-            "Effect": "Allow",
-            "Principal": {
-                "AWS":"arn:aws:iam::103299751604:user/agent"
-            },
-            "Action": "sts:AssumeRole",
-            "Condition": {}
+        "Effect": "Allow",
+        "Principal": {
+            "Service": "ec2.amazonaws.com"
+        },
+        "Action": "sts:AssumeRole"
         }
     ]
+    }
+    EOF
+  create_custom_policy = true
+  custom_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "s3:ListBucket",
+      "Effect": "Allow",
+      "Resource": "*"
+    },
+    {
+      "Action": ["s3:GetObject", "s3:PutObject"],
+      "Effect": "Allow",
+      "Resource": "arn:aws:s3:::my-s3-bucket/*"
+    }
+  ]
 }
 EOF
-}
+
+}⏎ 
 
 
 ```

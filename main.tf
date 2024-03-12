@@ -1,7 +1,21 @@
 resource "aws_iam_role" "main" {
-  name               = var.name
-  tags               = var.tags
-  assume_role_policy = var.assume_role_policy
+  name                  = var.name
+  tags                  = var.tags
+  assume_role_policy    = var.assume_role_policy
+  force_detach_policies = var.force_detach_policies
+  managed_policy_arns   = var.managed_policy_arns
+  max_session_duration  = var.max_session_duration
+  permissions_boundary  = var.permissions_boundary
+
+  dynamic "inline_policy" {
+    for_each = var.inline_policy_required ? [1] : []
+
+    content {
+      name   = var.inline_policy_name
+      policy = var.inline_policy
+    }
+  }
+
 }
 
 resource "aws_iam_role_policy_attachment" "role-policy-attachment" {
@@ -10,15 +24,17 @@ resource "aws_iam_role_policy_attachment" "role-policy-attachment" {
   policy_arn = var.iam_policy_arn[count.index]
 }
 
-resource "aws_iam_policy" "custome" {
-  count = var.custome_policy == null ? 0 : 1
-  name = "${var.name}-policy"
-  policy = var.custome_policy
+resource "aws_iam_policy" "custom" {
+  count  = var.create_custom_policy ? 1 : 0
+  name   = "${var.name}-policy"
+  policy = var.custom_policy
+  path   = var.iam_policy_path
+  
 }
 
-resource "aws_iam_role_policy_attachment" "custome-policy-attachment" {
-  count = var.custome_policy == null ? 0 : 1
+resource "aws_iam_role_policy_attachment" "custom-policy-attachment" {
+  count      = var.custom_policy == null ? 0 : 1
   role       = aws_iam_role.main.name
-  policy_arn = aws_iam_policy.custome[count.index].arn
+  policy_arn = aws_iam_policy.custom[count.index].arn
 }
 
