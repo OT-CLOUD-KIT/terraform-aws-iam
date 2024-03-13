@@ -37,6 +37,8 @@ module "iam-role" {
   inline_policy_required = true
   inline_policy_name     = "opstree-inline-policy"
   iam_policy_arn         = [module.iam-role.custom_policy_arn]
+  max_session_duration   = 3600
+  force_detach_policies  = false
   inline_policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
@@ -85,7 +87,7 @@ module "iam-role" {
 }
 EOF
 
-}⏎ 
+}
 
 
 ```
@@ -96,6 +98,6 @@ EOF
 |------|-------------|:----:|---------|:--------:|:---------:|
 | name | AWS IAM Role name. | `string` | | yes | |
 | assume_role_policy | Assume Role Policy for role. | `any` | | yes | |
-| custome_policy | Custome Policy for role. | `any` | | yes | |
+| custome_policy | Custom Policy for role. | `any` | | yes | |
 | tags | Additional tags for AWS IAM Role. | `map(string)` | | yes | |
 | iam_policy_arn | IAM Policy to be attached to role. | `list(string)` | | yes | |
