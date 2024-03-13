@@ -7,22 +7,20 @@ resource "aws_iam_role" "main" {
   max_session_duration  = var.max_session_duration
   permissions_boundary  = var.permissions_boundary
 
-  dynamic "inline_policy" {
-    for_each = var.inline_policy_required ? [1] : []
-
-    content {
-      name   = var.inline_policy_name
-      policy = var.inline_policy
-    }
-  }
-
 }
+
+# resource "aws_iam_role_policy_attachment" "role-policy-attachment" {
+#   role       = aws_iam_role.main.name
+#   count      = length(var.iam_policy_arn)
+#   policy_arn = var.iam_policy_arn[count.index]
+# }
 
 resource "aws_iam_role_policy_attachment" "role-policy-attachment" {
+  for_each   = { for idx, arn in var.iam_policy_arn : idx => arn }
   role       = aws_iam_role.main.name
-  count      = length(var.iam_policy_arn)
-  policy_arn = var.iam_policy_arn[count.index]
+  policy_arn = each.value
 }
+
 
 resource "aws_iam_policy" "custom" {
   count  = var.create_custom_policy ? 1 : 0
