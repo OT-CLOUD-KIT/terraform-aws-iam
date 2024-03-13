@@ -35,16 +35,6 @@ variable "force_detach_policies" {
 
 }
 
-variable "inline_policy_name" {
-  description = "Name for the inline policy"
-  type        = string
-}
-
-variable "inline_policy" {
-  description = "Inline policy document"
-  type        = string
-}
-
 # variable "name_prefix" {
 #   description = "Prefix for the IAM role name"
 #   type        = string
@@ -76,16 +66,8 @@ variable "max_session_duration" {
   default     = 3600
 }
 
-
-
 variable "permissions_boundary" {
   description = "ARN of the policy that is used to set the permissions boundary for the IAM role"
   type        = string
   default     = ""
-}
-
-variable "inline_policy_required" {
-  description = "Flag to indicate if inline policy is required"
-  type        = bool
-  default     = false
 }
