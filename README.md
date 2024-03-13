@@ -89,6 +89,21 @@ EOF
 
 }
 
+############# TO use custom.json in module
+
+locals {                         # create local variable first
+  assume_role_policy = jsondecode(file("assume_role_policy.json"))
+  custom_policy      = jsondecode(file("custom_policy.json"))
+}
+
+module "iam-role" {
+  source               = "./terraform-aws-iam"
+  name                 = "opstree_test"
+  iam_policy_arn       = [module.iam-role.custom_policy_arn]
+  assume_role_policy   = jsonencode(local.assume_role_policy)          # To use 
+  create_custom_policy = true
+  custom_policy        = jsonencode(local.custom_policy)               # To use
+}
 
 ```
 
