@@ -127,3 +127,21 @@ variable "create_rds_role" {
   type        = bool
   default     = false
 }
+
+variable "create_msk_role" {
+  description = "Provide permission to BuildPiper to create MSK Resource"
+  type        = bool
+  default     = false
+}
+
+variable "create_docdb_role" {
+  description = "Provide permission to BuildPiper to create DocumentDB Resource"
+  type        = bool
+  default     = false
+}
+
+variable "create_iam_role" {
+  description = "Provide permission to BuildPiper to create IAM Resource"
+  type        = bool
+  default     = false
+}

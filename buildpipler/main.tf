@@ -63,8 +63,8 @@ data "aws_iam_policy_document" "this" {
   }
 }
 
-resource "aws_iam_role_policy" "inline_policy_attachments" { 
-  name   = module.name_iam_role_policy.naming_tag[0] 
+resource "aws_iam_role_policy" "inline_policy_attachments" {
+  name   = module.name_iam_role_policy.naming_tag[0]
   role   = module.buildpiper_role.role["name"][0]
   policy = data.aws_iam_policy_document.this.json
 }
@@ -84,7 +84,7 @@ module "common_buildpiper_role" {
     name                  = "bp-network-skeleton"
     path                  = "/"
     desc                  = "IAM Role for BuildPiper to create basic resources"
-    policies              = ["bp-network-skeleton"]  
+    policies              = ["bp-network-skeleton"]
     trust_policy = {
       policy_template_file  = "assume-role-trust.tpl"
       policy_template_vars  = {
@@ -105,7 +105,7 @@ module "common_buildpiper_role" {
         "region"     = data.aws_region.current.name
       }
     }
-  ] 
+  ]
 }
 
 module "rds_buildpiper_role" {
@@ -125,7 +125,7 @@ module "rds_buildpiper_role" {
     name                  = "bp-rds"
     path                  = "/"
     desc                  = "IAM Role for buildpiper to create RDS Resources"
-    policies              = ["bp-rds"]  
+    policies              = ["bp-rds"]
     trust_policy = {
       policy_template_file  = "assume-role-trust.tpl"
       policy_template_vars  = {
@@ -143,5 +143,119 @@ module "rds_buildpiper_role" {
       policy_template_file = "rds-policy.tpl"
       policy_template_vars = {}
     }
-  ] 
+  ]
+}
+
+module "msk_buildpiper_role" {
+  source = "git@github.com:OT-CLOUD-KIT/terraform-aws-iam-role.git?ref=dev"
+
+  count = var.create_msk_role == true ? 1 : 0
+
+  env = var.env
+  app = var.app
+  bu  = var.bu
+
+  use_root_path_template  = var.use_root_path_template
+  policies_tags           = module.standard_tags.standard_tags
+  roles_tags              = module.standard_tags.standard_tags
+
+  roles         = [{
+    name                  = "bp-msk"
+    path                  = "/"
+    desc                  = "IAM Role for buildpiper to create MSK Resources"
+    policies              = ["bp-msk"]
+    trust_policy = {
+      policy_template_file  = "assume-role-trust.tpl"
+      policy_template_vars  = {
+        account_id       = data.aws_caller_identity.current.account_id
+        assume_role_name = module.buildpiper_role.role["name"][0]
+      }
+    }
+  }]
+
+  policies = [
+    {
+      name = "bp-msk"
+      path = "/"
+      desc = "IAM Policy for buildpiper to create MSK Resources"
+      policy_template_file = "msk-policy.tpl"
+      policy_template_vars = {}
+    }
+  ]
+}
+
+module "docdb_buildpiper_role" {
+  source = "git@github.com:OT-CLOUD-KIT/terraform-aws-iam-role.git?ref=dev"
+
+  count = var.create_rds_role == true ? 1 : 0
+
+  env = var.env
+  app = var.app
+  bu  = var.bu
+
+  use_root_path_template  = var.use_root_path_template
+  policies_tags           = module.standard_tags.standard_tags
+  roles_tags              = module.standard_tags.standard_tags
+
+  roles         = [{
+    name                  = "bp-docdb"
+    path                  = "/"
+    desc                  = "IAM Role for buildpiper to create DocumentDB Resources"
+    policies              = ["bp-docdb"]
+    trust_policy = {
+      policy_template_file  = "assume-role-trust.tpl"
+      policy_template_vars  = {
+        account_id       = data.aws_caller_identity.current.account_id
+        assume_role_name = module.buildpiper_role.role["name"][0]
+      }
+    }
+  }]
+
+  policies = [
+    {
+      name = "bp-docdb"
+      path = "/"
+      desc = "IAM Policy for buildpiper to create DocumentDB Resources"
+      policy_template_file = "documentdb-policy.tpl"
+      policy_template_vars = {}
+    }
+  ]
+}
+
+module "iam_buildpiper_role" {
+  source = "git@github.com:OT-CLOUD-KIT/terraform-aws-iam-role.git?ref=dev"
+
+  count = var.create_rds_role == true ? 1 : 0
+
+  env = var.env
+  app = var.app
+  bu  = var.bu
+
+  use_root_path_template  = var.use_root_path_template
+  policies_tags           = module.standard_tags.standard_tags
+  roles_tags              = module.standard_tags.standard_tags
+
+  roles         = [{
+    name                  = "bp-iam"
+    path                  = "/"
+    desc                  = "IAM Role for buildpiper to create IAM Resources"
+    policies              = ["bp-iam"]
+    trust_policy = {
+      policy_template_file  = "assume-role-trust.tpl"
+      policy_template_vars  = {
+        account_id       = data.aws_caller_identity.current.account_id
+        assume_role_name = module.buildpiper_role.role["name"][0]
+      }
+    }
+  }]
+
+  policies = [
+    {
+      name = "bp-iam"
+      path = "/"
+      desc = "IAM Policy for buildpiper to create IAM Resources"
+      policy_template_file = "iam-policy.tpl"
+      policy_template_vars = {}
+    }
+  ]
 }
