@@ -58,7 +58,10 @@ data "aws_iam_policy_document" "this" {
 
     resources = concat(
       [ for iam in module.common_buildpiper_role.role["arn"] : iam ],
-      var.create_rds_role == true ? [ for iam in module.rds_buildpiper_role[0].role["arn"] : iam ] : []
+      var.create_rds_role == true ? [ for iam in module.rds_buildpiper_role[0].role["arn"] : iam ] : [],
+      var.create_msk_role == true ? [ for iam in module.msk_buildpiper_role[0].role["arn"] : iam ] : [],
+      var.create_docdb_role == true ? [ for iam in module.docdb_buildpiper_role[0].role["arn"] : iam ] : [],
+      var.create_iam_role == true ? [ for iam in module.iam_buildpiper_role[0].role["arn"] : iam ] : []
     )
   }
 }
