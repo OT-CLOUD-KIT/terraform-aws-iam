@@ -145,3 +145,15 @@ variable "create_iam_role" {
   type        = bool
   default     = false
 }
+
+variable "create_s3_role" {
+  description = "Provide permission to BuildPiper to create S3 Resource"
+  type        = bool
+  default     = false
+}
+
+variable "create_dynamodb_role" {
+  description = "Provide permission to BuildPiper to create DynamoDB Resource"
+  type        = bool
+  default     = false
+}

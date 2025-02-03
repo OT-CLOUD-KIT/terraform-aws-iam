@@ -61,7 +61,9 @@ data "aws_iam_policy_document" "this" {
       var.create_rds_role == true ? [ for iam in module.rds_buildpiper_role[0].role["arn"] : iam ] : [],
       var.create_msk_role == true ? [ for iam in module.msk_buildpiper_role[0].role["arn"] : iam ] : [],
       var.create_docdb_role == true ? [ for iam in module.docdb_buildpiper_role[0].role["arn"] : iam ] : [],
-      var.create_iam_role == true ? [ for iam in module.iam_buildpiper_role[0].role["arn"] : iam ] : []
+      var.create_iam_role == true ? [ for iam in module.iam_buildpiper_role[0].role["arn"] : iam ] : [],
+      var.create_s3_role == true ? [ for iam in module.s3_buildpiper_role[0].role["arn"] : iam ] : [],
+      var.create_dynamodb_role == true ? [ for iam in module.dynamodb_buildpiper_role[0].role["arn"] : iam ] : []
     )
   }
 }
@@ -258,6 +260,82 @@ module "iam_buildpiper_role" {
       path = "/"
       desc = "IAM Policy for buildpiper to create IAM Resources"
       policy_template_file = "iam-policy.tpl"
+      policy_template_vars = {}
+    }
+  ]
+}
+
+module "s3_buildpiper_role" {
+  source = "git@github.com:OT-CLOUD-KIT/terraform-aws-iam-role.git?ref=iam-policy-update"
+
+  count = var.create_s3_role == true ? 1 : 0
+
+  env = var.env
+  app = var.app
+  bu  = var.bu
+
+  use_root_path_template  = var.use_root_path_template
+  policies_tags           = module.standard_tags.standard_tags
+  roles_tags              = module.standard_tags.standard_tags
+
+  roles = [{
+    name     = "bp-s3"
+    path     = "/"
+    desc     = "IAM Role for BuildPiper to manage S3 resources"
+    policies = ["bp-s3"]
+    trust_policy = {
+      policy_template_file  = "assume-role-trust.tpl"
+      policy_template_vars  = {
+        account_id       = data.aws_caller_identity.current.account_id
+        assume_role_name = module.buildpiper_role.role["name"][0]
+      }
+    }
+  }]
+
+  policies = [
+    {
+      name                 = "bp-s3"
+      path                 = "/"
+      desc                 = "IAM Policy for BuildPiper to manage S3"
+      policy_template_file = "s3-policy.tpl"
+      policy_template_vars = {}
+    }
+  ]
+}
+
+module "dynamodb_buildpiper_role" {
+  source = "git@github.com:OT-CLOUD-KIT/terraform-aws-iam-role.git?ref=iam-policy-update"
+
+  count = var.create_dynamodb_role == true ? 1 : 0
+
+  env = var.env
+  app = var.app
+  bu  = var.bu
+
+  use_root_path_template  = var.use_root_path_template
+  policies_tags           = module.standard_tags.standard_tags
+  roles_tags              = module.standard_tags.standard_tags
+
+  roles = [{
+    name     = "bp-dynamodb"
+    path     = "/"
+    desc     = "IAM Role for BuildPiper to manage DynamoDB resources"
+    policies = ["bp-dynamodb"]
+    trust_policy = {
+      policy_template_file  = "assume-role-trust.tpl"
+      policy_template_vars  = {
+        account_id       = data.aws_caller_identity.current.account_id
+        assume_role_name = module.buildpiper_role.role["name"][0]
+      }
+    }
+  }]
+
+  policies = [
+    {
+      name                 = "bp-dynamodb"
+      path                 = "/"
+      desc                 = "IAM Policy for BuildPiper to manage DynamoDB"
+      policy_template_file = "dynamodb-policy.tpl"
       policy_template_vars = {}
     }
   ]
